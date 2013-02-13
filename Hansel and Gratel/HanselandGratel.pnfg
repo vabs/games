@@ -1,4 +1,3 @@
-// Assignment 1 
 // Hansel and Gratel - The stupid way
 
 commands = {i,n,s,e,w,pick,wear,drop,look,read,swing,open,answer,use,train}
