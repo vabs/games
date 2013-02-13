@@ -1,0 +1,1199 @@
+// Assignment 1 
+// Hansel and Gratel - The stupid way
+
+commands = {i,n,s,e,w,pick,wear,drop,look,read,swing,open,answer,use,train}
+place = {Bedroom, you}
+staff = {you}
+room you {
+}
+
+room Bedroom {
+	label = "bedroom";
+	state {CupboardOpen, CupboardClosed}
+
+	(you,look) {
+		"You see a bed to the north; ";
+		"a cupboard to the west; ";
+		"a table stacked with the books which you have been planning long to read but never got chance to do so";
+		"You see your bedroom door to south.";
+		"You heard your aunty calling you for breakfast";
+	}
+
+	(you,n) {
+		"You walk up to the bed";
+	}
+
+	(you,s) {
+		"You are out of the bedroom. You are near the stairs";
+		move you from Bedroom to Stairs;
+	}
+
+	(you,w) {
+		"You walk up to the cupboard";
+	}
+
+	(you,e) {
+		"You hit the wall.";
+	}
+
+	(you,open, cupboard){
+		if(Kitchen.Breakfast){
+			if(Clothes.IronedClothes){
+				"You see a flashlight in the top shelf.";
+				+?Bedroom.CupboardOpen;
+				-?Bedroom.CupboardClosed;
+			}
+			else{
+				if(Flashlight.taken){
+					"You have only one pair of ironed clothes.";
+				}
+				else{
+					"You have only one pair of ironed clothes. You see a flashlight in the top shelf.";
+				}
+			}
+		}
+		else{
+			"Aunty is getting mad, you should go downstairs first";
+		}
+	}
+
+	(you, wear, clothes){
+		if(Bedroom.CupboardClosed){
+			"What to wear?";
+		}
+		else{
+			-Clothes.Pygamas;
+			+Clothes.IronedClothes;
+			"You changed into ironed clothes";
+		}
+	}
+	
+	(you, pick, flashlight){
+		if(Bedroom.CupboardClosed){
+			"What to pick?";
+		}
+		else{
+			"You picked the flashlight";
+			+?Flashlight.taken;
+			-?Flashlight.untaken;
+			move Flashlight from Bedroom to you;
+		}
+	}
+}
+
+room Stairs{
+	label = "stairs";
+	(you, look) {
+		"You see the stairs going down to the family room. Walk south to reach the kitchen";
+	}
+
+	(you, w) {
+		"You can't go that way";
+	}
+
+	(you, e) {
+		"You can't go that way";
+	}
+
+	(you, n) {
+		"You walk in the bedroom";
+		move you from Stairs to Bedroom;
+	}
+
+	(you, s) {
+		move you from Stairs to Kitchen;
+	}
+}
+
+room Kitchen{
+	label = "Kitchen";
+	state {Breakfast}
+	enter{
+		"You are in the kitchen now.";
+	}
+	(you, look){
+		if(Kitchen.Breakfast){
+			if(Clothes.IronedClothes){
+				if(Flashlight.taken){
+					"Uncle -> Cmon lad! Let's go in the woods";
+					"It is a bright sunny day. You see the sun shining through the woods.";
+					"You hear the sounds of jungle. This is the first time you have been out in the woods.";
+					move you from Kitchen to Jungle;
+				}
+				else{
+					"You forgot to take your flashlight";
+				}
+			}
+			else{
+				"Uncle -> Get ready, change clothes. You don't want to be late for the trip";
+			}
+		}
+		else{
+			+Kitchen.Breakfast;
+			"Your aunty and uncle is having breakfast. You sit on table and start eating the breakfast";
+			"After finishing your breakfast uncle asks you to get ready for the advanture in woods";
+			"Aunty said that you have clothes in the cupboard in bedroom";
+			"Also don't forget to pick up ~flashlight~";
+		}
+	}
+
+	(you,n){
+		move you from Kitchen to Stairs;
+		"You walk up the stairs";	
+	}
+
+	(you, s){
+		if(Kitchen.Breakfast){
+			"Uncle -> Get ready. You don't want to be late for the trip";
+		}
+		else{
+			"Aunty -> Eat your breakfast first! Than you move around";	
+		}
+	}
+
+	(you, w){
+		if(Kitchen.Breakfast){
+			"Uncle -> Get ready. You don't want to be late for the trip";
+		}
+		else{
+			"Aunty -> Eat your breakfast first! Than you move around";	
+		}
+	}
+
+	(you, e){
+		if(Kitchen.Breakfast){
+			"Uncle -> Get ready. You don't want to be late for the trip";
+		}
+		else{
+			"Aunty -> Eat your breakfast first! Than you move around";	
+		}
+	}
+}
+
+room Jungle{
+	label = "jungle";
+	state {unwarned, warned}
+	enter{
+		"You are in the jungle";
+	}
+
+	(you,look){
+		if(Axe.untaken){
+			"Uncle -> Here is the axe. Go, get me some firewood.";
+			"There are a lot of dying trees towards the west, you should go there.";
+			+Axe.taken;
+			-Axe.untaken;
+		}
+		else{
+			if(Firewood.untaken){
+				"Should go in west direction to get some firewood.";
+			}
+			else{
+				if(Note.taken){
+					if(Fishingrod.taken){
+						if(Bread.taken){
+							"This is your chance to live your dream";
+							"Explore around";
+						}
+						else{
+							"Don't forget the bread.";
+							"It's always good to carry some food";
+						}
+					}
+					else{
+						"Don't forget the fishing rod.";
+					}
+					" ";
+					"You can go in any cardinal direction.";
+				}
+				else{
+					"There is a note stuck to the rock";
+				}
+			}
+		}
+	}
+
+	(you, read, note){
+		if(Firewood.taken){
+			if(Note.untaken){
+				"You recognize the uncle's handwriting on the note";
+				"~~~~~~~~~";
+				"Hansel,";
+				"	I have been captured by the Riddler.";
+				"	I leave you with a ~fishing_rod~ and some ~bread~ here.";
+				"	Please save me.";
+				"-Uncle";
+				"~~~~~~~~~";
+				"";
+				"After reading the note, you are afraid.";
+				"Either you can go back to village to get some help.";
+				"Or you can go on your own to save your uncle";
+				+?Note.read;
+			}
+		}
+		else{
+			"read what ??!";
+		}
+	}
+
+	(you, pick, fishing_rod){
+		if(Note.read){
+			if(Fishingrod.untaken){
+				"You place fishing-rod in your bag";
+				+Fishingrod.taken;
+				-Fishingrod.untaken;
+			}
+			else{
+				"You already have fishing_rod in your bag";
+			}
+		}
+		else{
+			"Which fishingrod ??!";
+		}
+	}
+
+
+	(you, pick, note){
+		if(Note.read){
+			if(Note.untaken){
+				"You placed the note in your pocket";
+				+Note.taken;
+				-Note.untaken;
+			}
+			else{
+				"You already have note in pocket";
+			}
+		}
+		else{
+			"Which note ??!";
+		}
+	}
+
+	(you, pick, bread){
+		if(Note.read){
+			if(Bread.untaken){
+				+Bread.taken;
+				-Bread.untaken;
+				"You placed bread in your bag";
+			}
+			else{
+				"You already have bread in your bag";
+			}
+		}
+		else{
+			"There is no bread around !";
+		}
+	}
+
+	(you,w){
+		"You are in the firewood jungle.";
+		if(Firewood.untaken){
+			"You found a dying tree";
+			"To cut the tree, use <swing> command";
+			move you from Jungle to FirewoodForest;
+		}
+		else{
+			"But you don't see uncle there so came back";
+		}
+	}
+
+	(you,n){
+		if(Jungle.unwarned){
+			"You have heard of rumors of big wolves in north of the jungle";
+			"You don't want to go that way";
+			+Jungle.warned;
+			-Jungle.unwarned;
+		}
+		else{
+			"You went there even knowing the danger";
+			"You found yourself surrounded by the pack of wolves";
+			"They attack you and you DIE!";
+			+game.lose;
+		}
+	}
+
+	(you,s){
+		"You see fields in a distance";
+		"You walk towards the fields in order to get some help";
+		move you from Jungle to Fields;
+	}
+
+	(you, e){
+		move you from Jungle to GrassPassway;
+	}
+}
+
+room GrassPassway{
+	label="Grass Passage";
+	enter{
+		"You are walking on a green grass passage";
+		"The passage is unidirectional, as the large bushes blocks the way to north and south";
+	}
+
+	(you, n){
+		"Way is blocked by large weed growing in absurd way";
+	}
+
+	(you, e){
+		"The passage lead you into an cave.";
+		move you from GrassPassway to Cave;
+	}
+
+	(you, w){
+		move you from GrassPassway to Jungle;
+	}
+
+	(you, s){
+		"Way is blocked by large weed growing in absurd way";
+	}
+}
+
+
+room Cave{
+	label = "Cave";
+	state {unlit}
+	enter{
+		"You're in Cave now";
+	}
+
+	(you, look){
+		if(Cave.unlit){
+			"You don't want to stumble around in the dark";
+			"You can use your flashlight";
+		}
+	}
+
+	(you, use, flashlight){
+		if(Crystal.untaken){
+			"You turned on the flashlight.";
+			"You see around the cave various drawings of men in war.";
+			"There is one peculiar drawing in which a man is using a crystal to kill an deamon";
+			" ";
+			"As your move further in the cave, you see something shining in the floor.";
+			"You got to take a closer look and see the crystal as in the drawing; but broken.";
+			"It is stuck in wall. You pull the crystal out and walls started to shaking.";
+			"The cave started collapsing.";
+			"You ran out of the other opening of the cave.";
+			"But you can't go back now";
+			"";
+			"You still have the crystal in your hand.";
+			"You put the crystal and put in your bag";
+			+Crystal.taken;
+			-Crystal.untaken;
+			move you from Cave to YellowBrickRoad;
+		}
+		else{
+			"Flash light is already on.";
+		}
+	}
+
+	(you, n){
+		"You don't want to stumble around in the dark";
+		"You can use your flashlight";
+	}
+
+	(you, e){
+		"You don't want to stumble around in the dark";
+		"You can use your flashlight";
+	}
+
+	(you, w){
+		"You don't want to stumble around in the dark";
+		"You can use your flashlight";
+	}
+
+	(you, s){
+		"You don't want to stumble around in the dark";
+		"You can use your flashlight";
+	}
+}
+
+room YellowBrickRoad{
+
+	(you, look){
+		"You are on Yellow Brick Road.";
+		"You see a vilage at a distance in north.";
+	}
+
+	(you, e){
+		"Your way back to the cave is blocked by fallen stones.";
+	}	
+
+	(you, n){
+		"You walk on the yellow brick road to reach a village.";
+		move you from YellowBrickRoad to Village;
+	}
+
+	(you, w){
+		"There is nothing interesting that way.";
+	}	
+}
+
+room Village{
+	enter{
+		"You are in the village of mushrooms.";
+	}
+
+	(you, look){
+		"You are standing at the village center and you see look around.";
+		"You see elves living in mushroom houses.";
+		"You know that elves are the fairest and wisest creature on the earth.";
+		"Soon the king of elves walk up to you and ask for your purpose to visit their village.";
+		"";
+		"You -> My uncle have been captured by Riddler. I am looking for a way to find the Ridller's Castle.";
+		"But I seems to have lost my way.";
+		"";
+		"King -> Don't worry son. We will assist you.";
+		"He takes you to the King's Palace.";
+		move you from Village to KingPalace;
+	}
+}
+
+room KingPalace{
+	enter{ 
+		if(TrainingRoom.LearnFireball){
+			"As you are entering the King's Palace, you see big status of Elves stand as guard to it.";
+			"You are astonished by the beauty of the valley.";
+			"The architecture of the palace is magnificant.";
+			"There are big dome on each arch and the white stone used shines gracefully in the sunlight.";
+		}
+		else{
+			"Now as your training is complete. I will show you the way to find the Riddler";
+			"";
+			"As you were walking down the stairs the crystal fell through your bag.";
+			"King was astonished to see the half crystal you posses.";
+			"King wants to tell you about the story of crystal.";
+			"``````````````````";
+			"If want to skip the story use <skip> command.";
+			"Else use <go_on> command.";
+		}
+	}
+
+	(you, skip){
+		"You have skipped the story.";
+		"King traded crystal for an Armor with you.";
+		"He showed you the way to the Riddler.";
+		move you from KingPalace to GreenCastle;
+	}
+
+	// Use creativity
+	(you, go_on){
+		"Long long time ago";
+	}
+
+	(you, look){
+		"King -> We have heard of number of mischevious acts by The Riddler.";
+		"But defeating Riddler is not an easy task.";
+		"You need both sound mind and body strength.";
+		"But I see that you are already strong in mind.";
+		"We will teach you some magic which can we used to fight the evil witch which guards the castle.";
+		"";
+		"You -> Thankyou my King! I would appreciate any help.";
+		"`````````````";
+		"PS: you should use <train> command";
+	}
+
+	(you, train){
+		"First of all we will teach you how to use fireball.";
+		"But remember, since fireball uses your strength, so use it wisely.";	
+		move you from KingPalace to TrainingRoom;
+	}
+
+	(you, n){
+		"You should not roam around in the palace. Elves don't like it";
+	}
+	(you, e){
+		"You should not roam around in the palace. Elves don't like it";
+	}
+	(you, w){
+		"You should not roam around in the palace. Elves don't like it";
+	}
+	(you, s){
+		"You should not roam around in the palace. Elves don't like it";
+	}
+}
+
+room TrainingRoom{
+	state {LearnFireball, Complete}
+	enter{
+		"You are directed to the training room by an elf.";
+		"Elves are the first of the kind who were able to extract information from ancient texts.";
+		"Their knowledge of magic is vast, and you are lucky enough to learn something from them.";
+	}
+
+	(you, look){
+		if(TrainingRoom.LearnFireball){
+			"First I will teach you how and when to use a FIREBALL";
+			"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+			"|								       |";
+			"|			 FIREBALL TRAINING		   |";
+			"|									   |";
+			"|									   |";
+			"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+			"";
+			"Using a fireball is easy but learning is difficult.";
+			"Since you need to use the strength of your mind to make a fireball, you need to learn the words.";
+			"Always before using a fireball you need to say the word ' s7ar7_s1mpl3 '";
+			"Let's try it once!";
+		}
+	}
+
+	(you, s7ar7_s1mpl3){
+		+?Fireball.activated;
+		-?Fireball.untaken;
+		"Now Fireball is active in your inventory.";
+		"You can use it when ever you want.";
+		"";
+		"Now let's move to the second part of the training.";
+		"Now I will teach you how to use STUN.";
+		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+		"|									  |";
+		"|			 STUN TRAINING		      |";
+		"|									  |";
+		"|									  |";
+		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+		"";
+		"Use stun when someone is trying to attack you.";
+		"Stun makes the spikes rising from the ground under making your enemies stand in one place.";
+		"Always before using a stun you need to say the word ' imp1a3_3ar7h ' ";
+		"Let's try it once!";
+	}
+
+	(you, imp1a3_3ar7h){
+		" ";
+		+?Stun.activated;
+		-?Stun.untaken;
+		"Now Fireball is active in your inventory.";
+		"You can use it when ever you want";
+		"Your training is complete, now let's go back to to King.";
+		-?TrainingRoom.LearnFireball;
+		+?TrainingRoom.Complete;
+		move you from TrainingRoom to KingPalace;
+
+	}
+}
+
+room GreenCastle{	
+	state {fight0, fight1, fight2, fight3, fightStart}
+	counter {lives 1 5}
+	enter{
+		"You have reached the Green Castle now.";
+	}
+
+	(you, look){
+		if(GreenCastle.fight0){
+			"You see a witch gurading the way to the castle.";
+			"You should defeat her to get access to the castle.";
+			"";
+			"She sees you and coming towards you, get ready";
+			"````````````";
+			"Remember to use the magic you learnt from the elves. Those will be very useful against her";
+		}
+		if(GreenCastle.fight1){
+			"You see witch coming towards you.";
+			"She can kill you don't let that happen";
+		}
+	}
+
+	(you, use, fireball){
+		if(GreenCastle.fight0){
+			"You threw a fireball against her";
+			"She was knocked out from her flying broomstick.";
+			+GreenCastle.fight1;
+			-GreenCastle.fight0;
+			+GreenCastle.fightStart;
+		}
+		if(GreenCastle.fight1){
+			"She dodged the firewall.";
+			"You should use something else.";
+		}
+		if(GreenCastle.fight2){
+			"You throw a fireball at her.";
+			"But she does heal after the burn.";
+			"You need to cut her throat to kill her";
+		}
+	}
+
+	(you, use, stun){
+		if(GreenCastle.fight0){
+			"She is flying on her broomstick.";
+			"You can't stun her while she is flying.";
+		}
+		if(GreenCastle.fight1){
+			"You have stunned her in place.";
+			"You walk up to her. You should cut her throat.";
+			-GreenCastle.fight1;
+			+GreenCastle.fight2;
+		}
+		if(GreenCastle.fight2){
+			"She is already stunned in her place.";
+		}
+	}
+
+	(you, swing, axe){
+		if(GreenCastle.fight2){
+			"You killed the evil witch.";
+			"Now you can walk into the Castle.";
+			-GreenCastle.fight2;
+			-GreenCastle.fightStart;
+			move you from GreenCastle to InsideCastle;
+		}
+		if(GreenCastle.fight1){
+			"Witch becomes invisible whenever you try to kill her with axe.";
+			"You need her to be stunned.";
+		}
+		if(GreenCastle.fight0){
+			"She is flying on her broom.";
+			"You should not throw you axe at her.";
+		}
+	}
+}
+
+thread(){
+	if(GreenCastle.fightStart){
+		if(GreenCastle.lives == 5){
+			"Witch killed you.";
+			"You're dead.";
+			+game.lose;
+		}
+		else{
+			GreenCastle.lives++;
+		}
+	}
+
+	if(InsideCastle.riddleStart){
+		if(InsideCastle.moves == 10){
+			"You cannot answer Riddler Questions.";
+			"Riddlers makes you his prisoner.";
+			+game.lose;
+		}
+		else{
+			InsideCastle.moves++;
+		}
+	}
+}
+
+room InsideCastle{
+	state { riddle1, riddle2, riddle3, riddleStart }
+	counter { moves 0 10 }
+	enter{
+		" ";
+		" ";
+		"``````````````````````````````````";
+		"You are now in Riddler's Castle. You see question markes everywhere.";
+		"The wallpaper has question marks imprinted.";
+		"The center table is shaped as a question mark.";
+		"You see the Riddler sitting in his chair, holding a staff shaped as question mark(?)";
+		"``````````````````````````````````";
+		" ";
+		" ";
+		"You walk upto him and ask to free your uncle.";
+		"Riddler -> hahahahaha! He will only be free if you can answer my riddles.";
+		"``````````````````````````````````";
+		"You -> Ask me! I am not going without my uncle.";
+		"``````````````````````````````````";
+		" ";
+		"Riddler -> You have only 10 moves to answer all the questions. Use them wisely.";
+		"";
+		"<------------ Riddle 1 ------------>";
+		"What a korean girl calls an older brother?";
+		"Hint: Psy's famous song.";
+		"PS: use <answer> command to answer the question";
+		+InsideCastle.riddleStart;
+	}
+
+	(you, answer, oppa){
+		if(InsideCastle.riddle1){
+			" ";
+			" ";
+			"Great. Here comes the next.";
+			" ";
+			"<------------ Riddle 2 ------------>";
+			"Who doesn't play dice?";
+			"Hint: Einstein";
+			"PS: use <answer> command to answer the question";
+			-InsideCastle.riddle1;
+			+InsideCastle.riddle2;
+		}
+		else{
+			"This is not the correct answer.";
+		}
+	}
+
+	(you, answer, god){
+		if(InsideCastle.riddle2){
+			" ";
+			" ";
+			"Great. Hear is the another one.";
+			" ";
+			"<------------ Riddle 3 ------------>";
+			"I do not have fingers, but I have a ring";
+			"Dogs brak when they hear me ding";
+			"I introduce visitors, though not by their name";
+			"Naughty children push me in their games";
+			"PS: use <answer> command to answer the question";
+		}
+		else{
+			"This is not the correct answer.";
+		}
+	}
+
+	(you, answer, bell){
+		if(InsideCastle.riddle3){
+			"Riddler -> Great. You are the first person who have answered all my questions";
+			"I free you uncle and can go home now.";
+			"```````````````````````````";
+			"Riddler opens a portal for you to go back home.";
+			"You came back home with uncle safe and sound.";
+			+game.win;
+		}
+		else{
+			"This is not the correct answer";
+		}
+	}
+
+	(you, look){
+		"You should not waste your moves on commands like these.";
+		"You should answer the question.";
+	}
+}
+
+
+// You win the game here
+room Fields{
+	label = "fields";
+	state {CatQuestOn, CatQuestOff}
+	enter{
+		if(FindCat.notfound){
+			if(Fields.CatQuestOn){
+				"Farmer -> Where is my cat? Have you got it?";
+				"If you don't remember, I saw it going towards east last";
+			}
+			if(Fields.CatQuestOff){
+				if(Firewood.taken){
+					"You walk into the field met a farmer";
+					"You told him that you are looking a way to go back home.";
+					"He agreed to help you out, but only if you help in finding the cat";
+					"Last time, I saw it go towards east";
+					"`````````````````````";
+					"Jungle is towards the north";
+				}
+				else{
+					"You walk into the field met a farmer";
+					"He wants your help in finding the cat";
+					"Farmer -> Last time, I saw it go towards east";
+					"`````````````````````";
+					"Jungle is towards the north";
+				}
+			}
+		}
+		else{
+			"Farmer -> Thankyou for finding my cat.";
+			"You were so kind to me";
+			"Let me show you the way back to home";
+			"Farmer shows you the way back to home";
+			"On returning back to home, ";
+			"You told the story of using a fishing rod and some firewood to make a raft.";
+			"You asked people of village to help you out in finding your uncle.";
+			"You went with people of village and found the uncle.";
+			"````````````````````";
+			"It was not as much advanture as expected but you again wish to go back to jungle and explore";
+			"the east side of jungle which is rumoured to have riddler and magical creatures";
+			"````````````````````";
+			+game.win;
+		}
+	}
+	
+	(you, look){
+		"You see the only way to the east where farmer pointed and said he last saw his cat";
+	}
+	
+	(you, e){
+		if(Firewood.taken){
+			if(Fishingrod.taken){
+				if(FindCat.notfound){
+					+?Fields.CatQuestOn;
+					-Fields.CatQuestOff;
+				}
+			}
+		}
+		move you from Fields to FindCat;
+
+	}
+
+	(you, n){
+		move you from Fields to Jungle;
+	}
+}
+
+room FindCat{
+	label = "the lost cat room";
+	state {found, notfound}
+	enter{
+		"You see a pond with lot of fishes.";
+	}
+
+	(you, look){
+		if(FindCat.notfound){
+			"You see cat on a woodden plank floating in the pond";
+			"The cat look scared";
+			"You need to swim to the cat. You don't want to spoil your clothes so you should take off / drop them.";
+			"Or you can use some item from your inventory";
+			"";
+			"`````````";
+			"Fields is to the west";
+		}
+		else{
+			"You see a pond with lot of fishes.";
+			"You have got the cat. Should return it to the farmer.";
+		}
+	}
+
+	(you, w){
+		move you from FindCat to Fields;
+	}
+
+	(you, n){
+		"You can't go that way!";
+	}
+
+	(you, e){
+		"You can't go that way!";
+	}
+
+	(you, s){
+		"You can't go that way!";
+	}
+
+	(you, wear, clothes){
+		if(Clothes.Naked){
+			"You wore clothes";
+			+Clothes.IronedClothes;
+			-Clothes.Naked;
+		}
+		else{
+			"You are already wearing clothes";
+		}
+	}
+
+	(you, drop, clothes){
+		if(Clothes.IronedClothes){
+			"You're now naked";
+			+Clothes.Naked;
+			-Clothes.IronedClothes;
+		}
+		else{
+			if(Clothes.Naked){
+				"You're already naked";
+			}
+		}
+	}
+
+	(you, use, fishing_rod){
+		if(Cat.untaken){
+			if(Fishingrod.taken){
+				"You used the thread of fishing rod and firewood to make a small raft";
+				"You use the raft to go in pond and bring the cat back";
+				+Cat.taken;
+				-Cat.untaken;
+				+FindCat.found;
+				-FindCat.notfound;
+				-Firewood.taken;
+				+Firewood.untaken;
+				-Fishingrod.taken;
+				+Fishingrod.untaken;
+			}
+			else{
+				if(Firewood.taken){
+					"You don't have any rope / thread to make a raft out of firewood.";	
+					"Did you forget something in jungle?";			
+				}
+				else{
+					"You don't have a fishing rod.";
+					"Did you forgot something in the jungle";
+				}
+			}	
+		}
+		else{
+			"You already have the cat";
+		}
+	}
+}
+
+
+room FirewoodForest{
+	label = "firewood forest";
+	state { NormalState,PuzzleState,FirstQuestion,SecondQuestion }
+		
+	(you, look){
+		if(Axe.untaken){
+			"You don't have an axe to cut trees";
+		}
+		else{
+			"You are in the firewood forest";
+			"You should use <swing> command to cut the tree";
+		}
+	}
+
+	(you, e){
+		if(Firewood.taken){
+			"You came back with firewood.";
+			"But you don't see your uncle.";
+			move you from FirewoodForest to Jungle;
+		}
+		else{
+			"You should not leave with some firewood.";
+			"You don't want uncle to get angry at you";
+		}
+	}
+
+	(you, n){
+		"Large bushes blocks your way";
+	}
+
+	(you, s){
+		"You came across a pond.";
+	}
+
+	(you, w){
+		"There are throny shrubs this way";
+		"You don't want your clothes to be torn";
+	}
+
+	(you, swing){
+		"Swing what??!";
+	}
+
+	(you, swing, axe){
+		if(Tree.Inactive){
+			-Tree.Inactive;
+			+Tree.Active;
+			"The tree you were trying to cut came to life";
+			"********************************************";
+			"Dying Tree -> Hey Hey stop! You can't kill trees here without permission.";
+			"You need to answer my 2 questions, before swinging your axe again.";
+			"********************************************";
+			"";
+			"--------:Here is my first question:--------";
+			"What is the answer to life, universe and everything?";
+			"";
+			"PS: (Read Hitchhiker's guide to the galaxy)";
+			"PPS: use <answer> command to give the answer";
+			"PPPS: answer should be given in format: answer a10.";
+
+			+FirewoodForest.PuzzleState;
+			-FirewoodForest.NormalState;
+		}
+		else{
+			if(FirewoodForest.NormalState){
+				if(Firewood.taken){
+					"You can't carry anymore firewood";
+				}						
+				else{
+					+Firewood.taken;
+					-Firewood.untaken;
+					"Firewood added to your inventory";
+				}
+			}
+			else{
+				"Die you fool !!";
+				+game.lose;
+			}
+		}
+	}
+
+
+	(you, answer, a42){
+		if(FirewoodForest.FirstQuestion){
+			"You have already answered Question 1";
+		}
+		else{
+			+FirewoodForest.FirstQuestion;
+			"";
+			"Correct Answer! Now there is a more interesting one for you.";
+		}
+		"I hope you like number puzzles";
+		"";
+		"--------:Here is my second question:--------";
+		"Tell the number which has a peculiar property that it is equal to thrice the sum of the digits of the number?";
+		"";
+		"PS: (The answer is an integer less than 50).";
+		"PPS: use <answer> command to give the answer.";
+		"PPPS: answer should be given in format: answer a10.";
+	}
+
+	(you, answer, a27){
+			-?FirewoodForest.PuzzleState;
+			+?FirewoodForest.NormalState;
+			+?FirewoodForest.SecondQuestion;
+			if(FirewoodForest.SecondQuestion){
+				if(Firewood.taken){
+					"You already got firewood.";
+				}
+				else{
+					"You have already answered all the questions.";
+					"Swing you axe to gather some firewood";
+				}
+			}
+	}
+
+}
+
+
+
+
+// Objects 
+object Clothes{
+	state {Naked, Pygamas, IronedClothes, Armor}
+}
+
+object Flashlight{
+	state {taken, untaken}
+}
+
+object Axe{
+	state {taken, untaken}
+}
+
+object Firewood{
+	state {taken, untaken}
+}
+
+object Tree{
+	state {Active, Inactive}
+}
+
+object Cat{
+	state {taken, untaken}
+}
+
+object Fishingrod{
+	state {taken, untaken}
+}
+
+object Bread{
+	state {taken, untaken}
+}
+
+object Note{
+	state {taken, untaken, read}
+}
+
+object Crystal{
+	state {taken, untaken}
+}
+
+object Shield{
+	state {taken, untaken}
+}
+
+object Stun{
+	state {activated, untaken}
+}
+
+object Fireball{
+	state {activated, untaken}
+}
+
+// End of objects 
+
+
+start {
+	+Clothes.Pygamas;
+	+Bedroom.CupboardClosed;
+	+Jungle.unwarned;
+	+FirewoodForest.NormalState;
+	+Firewood.untaken;
+	+Tree.Inactive;
+	+Fields.CatQuestOff;
+	+FindCat.notfound;
+	+Cave.unlit;
+	+Cat.untaken;
+	+TrainingRoom.LearnFireball;
+	+GreenCastle.fight0;
+
+	// Initializing Objects
+	+Flashlight.untaken;
+	+Axe.untaken;
+	+Shield.untaken;
+	+Stun.untaken;
+	+Fireball.untaken;
+	+Bread.untaken;
+	+Note.untaken;
+	+Fishingrod.untaken;
+	+Crystal.untaken;
+	// Objects Initialization Ends
+
+
+	move Flashlight from offscreen to Bedroom;
+	move you from offscreen to Bedroom;
+	" ";
+" ";" ";" ";" ";" ";" ";" ";
+	"PS: Anytime you are lost in the game. Try <help> command.";
+	"You woke up in your bedroom. Today is Sunday and you are exicted as your uncle told you that he will take you to the woods today.";
+}
+
+(you,i) {
+	if (Clothes.Naked) {
+		"You're naked.";
+	}
+	if (Clothes.Pygamas) {
+		"You're wearing night suit.";
+	}
+	if (Clothes.IronedClothes) {
+		"You're wearing ironed clothes.";
+	}
+	if (Clothes.Armor) {
+		"You're wearing an Mithril given you by elves. This is considered as the hardest armor known.";
+	}
+	if (Flashlight.taken) {
+		"You have an Flash Light. You should use it only during night time.";
+	}
+	if (Axe.taken) {
+		"You have an Axe. It is sharp enough to cut some trees.";
+	}
+	if (Firewood.taken) {
+		"You have firewood.";
+	}
+	if (Fishingrod.taken) {
+		"You have Fishing Rod.";
+	}
+	if (Note.taken) {
+		"You have note in your pocket.";
+	}
+	if (Bread.taken) {
+		"You have bread.";
+	}
+	if (Crystal.taken) {
+		"You have broken crystal from the cave.";
+	}
+	if (Fireball.activated) {
+		"You can now use Fireball.";
+	}
+	if ( Stun.activated) {
+		"You can now use Stun.";
+	}
+}
+
+(you,quit) {
+	"Really! You don't want to reach the end.!!";
+	+game.lose;
+}
+
+(you,help) {
+	"You have can following commands";
+	"###############################";
+	"i - Inventory";
+	"n - Walk North";
+	"s - Walk South";
+	"e - Walk East";
+	"w - Walk West";
+	"wear - Wear Clothes / Armor";
+	"pick - Pick items";
+	"drop - Drop item from Inventory";
+	"look - Look around the place you are in";
+	"answer - Answer Questions";
+	"swing - Swing Axe / Sword";
+	"###############################";
+	"If lost in the game, use <look> command";
+}
